@@ -1,6 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+// 🔑 PASTE YOUR SUPABASE DETAILS BELOW
+const supabase = createClient(
+  "https://zpacqzvjzvbomrbhabtf.supabase.co",
+  "sb_publishable_5K2L2Kzgzdup8Ls_XDZgGQ_4nDvBCV7"
+);
 
 export default function Home() {
   const [productCost, setProductCost] = useState("");
@@ -8,12 +15,14 @@ export default function Home() {
   const [refundRate, setRefundRate] = useState("");
   const [feesPercent, setFeesPercent] = useState("");
   const [result, setResult] = useState(null);
+  const [email, setEmail] = useState("");
+  const [showResults, setShowResults] = useState(false);
 
   function calculateROAS() {
     const cost = parseFloat(productCost);
     const price = parseFloat(salePrice);
-    const refund = parseFloat(refundRate) / 100;
-    const fees = parseFloat(feesPercent) / 100;
+    const refund = parseFloat(refundRate || 0) / 100;
+    const fees = parseFloat(feesPercent || 0) / 100;
 
     if (!cost || !price) return;
 
@@ -23,16 +32,23 @@ export default function Home() {
 
     if (profit <= 0) {
       setResult("Unprofitable");
-      return;
+    } else {
+      const breakevenROAS = price / profit;
+      setResult(breakevenROAS.toFixed(2));
     }
 
-    const breakevenROAS = price / profit;
-    setResult(breakevenROAS.toFixed(2));
+    setShowResults(false);
+  }
+
+  async function unlockResults() {
+    if (!email) return;
+
+    await supabase.from("leads").insert([{ email }]);
+    setShowResults(true);
   }
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
-      
       <div className="max-w-xl w-full bg-white p-8 rounded-2xl shadow-lg">
 
         <h1 className="text-3xl font-bold text-center mb-4">
@@ -40,14 +56,14 @@ export default function Home() {
         </h1>
 
         <p className="text-center text-gray-600 mb-6">
-          Calculate your TRUE breakeven ROAS after refunds, payment fees, 
+          Calculate your TRUE breakeven ROAS after refunds, payment fees,
           and discounts — before you scale.
         </p>
 
         <div className="bg-gray-100 p-4 rounded mb-6">
           <p className="text-sm text-gray-700">
             Most store owners only calculate product margin.
-            They ignore refunds, transaction fees, and discount rates.
+            They ignore refunds and transaction fees.
             That mistake destroys profit when scaling ads.
           </p>
         </div>
@@ -91,7 +107,27 @@ export default function Home() {
 
         </div>
 
-        {result && (
+        {/* EMAIL GATE */}
+        {result && !showResults && (
+          <div className="mt-6 space-y-3">
+            <input
+              type="email"
+              placeholder="Enter your email to unlock results"
+              className="w-full border p-2 rounded"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <button
+              onClick={unlockResults}
+              className="w-full bg-blue-600 text-white p-3 rounded"
+            >
+              Unlock My Results
+            </button>
+          </div>
+        )}
+
+        {/* RESULTS */}
+        {result && showResults && (
           <div className="mt-6 p-4 rounded bg-gray-50 border">
             <p className="text-xl font-semibold">
               Your True Breakeven ROAS: {result}
@@ -118,7 +154,6 @@ export default function Home() {
         )}
 
       </div>
-
     </main>
   );
 }
