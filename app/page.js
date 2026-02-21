@@ -17,39 +17,67 @@ export default function Home() {
     const netProfit =
       discountedPrice - cogs - shipping - processingFee - refundLoss;
 
-    const breakevenROAS = price / (price - netProfit);
+    const breakevenROAS =
+      netProfit > 0 ? (price / netProfit).toFixed(2) : "Not Profitable";
 
     setResult({
       netProfit: netProfit.toFixed(2),
-      breakevenROAS: breakevenROAS.toFixed(2),
+      breakevenROAS,
     });
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        Shopify Breakeven ROAS Calculator
-      </h1>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          True Breakeven ROAS Calculator
+        </h1>
 
-      <div className="flex flex-col gap-3 w-64">
-        <input placeholder="Product Price" onChange={e => setPrice(Number(e.target.value))} />
-        <input placeholder="COGS" onChange={e => setCogs(Number(e.target.value))} />
-        <input placeholder="Shipping" onChange={e => setShipping(Number(e.target.value))} />
-        <input placeholder="Processing Fee %" onChange={e => setFees(Number(e.target.value))} />
-        <input placeholder="Refund Rate %" onChange={e => setRefund(Number(e.target.value))} />
-        <input placeholder="Discount %" onChange={e => setDiscount(Number(e.target.value))} />
+        <div className="flex flex-col gap-3">
+          <input className="border p-2 rounded"
+            placeholder="Product Price (£)"
+            onChange={e => setPrice(Number(e.target.value))}
+          />
+          <input className="border p-2 rounded"
+            placeholder="COGS (£)"
+            onChange={e => setCogs(Number(e.target.value))}
+          />
+          <input className="border p-2 rounded"
+            placeholder="Shipping (£)"
+            onChange={e => setShipping(Number(e.target.value))}
+          />
+          <input className="border p-2 rounded"
+            placeholder="Processing Fee (%)"
+            onChange={e => setFees(Number(e.target.value))}
+          />
+          <input className="border p-2 rounded"
+            placeholder="Refund Rate (%)"
+            onChange={e => setRefund(Number(e.target.value))}
+          />
+          <input className="border p-2 rounded"
+            placeholder="Average Discount (%)"
+            onChange={e => setDiscount(Number(e.target.value))}
+          />
 
-        <button onClick={calculate} className="bg-black text-white p-2">
-          Calculate
-        </button>
-      </div>
-
-      {result && (
-        <div className="mt-6 text-center">
-          <p>Net Profit Per Sale: £{result.netProfit}</p>
-          <p>Breakeven ROAS: {result.breakevenROAS}x</p>
+          <button
+            onClick={calculate}
+            className="bg-black text-white p-3 rounded mt-2 hover:bg-gray-800 transition"
+          >
+            Calculate
+          </button>
         </div>
-      )}
+
+        {result && (
+          <div className="mt-6 text-center border-t pt-4">
+            <p className="font-semibold">
+              Net Profit Per Sale: £{result.netProfit}
+            </p>
+            <p className="font-semibold mt-2">
+              Breakeven ROAS: {result.breakevenROAS}x
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
